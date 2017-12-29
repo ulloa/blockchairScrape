@@ -21,21 +21,21 @@ while (i < blockHeight) {
     
     myUrl <- paste0("https://api.blockchair.com/bitcoin/outputs?q=is_spent(0),block_id(", i, "..", j, ")&fields=recipient,value&export=csv")
 
-    x <- getURL(myUrl)
-    out <- read.csv(textConnection(x))
-
-    if (ncol(out) == 2) {
+    blockFile <- getURL(myUrl)
+    headString <- substr(blockFile, 2, 10)
+    if (headString == 'recipient') {
     
-        write.csv(out, paste0('./data/data', datasetNum, '.csv'), row.names=FALSE)
+        write(blockFile, paste0('./data/data', datasetNum, '.csv'))
 
     } else {
         print(datasetNum)
-        while (ncol(out) != 2) {
-            Sys.sleep(20)
-            x <- getURL(myUrl)
-            out <- read.csv(textConnection(x))
-            if (ncol(out) == 2) {
-                write.csv(out, paste0('./data/data', datasetNum, '.csv'), row.names=FALSE)
+        while (headString != 'recipient') {
+            Sys.sleep(sample(1:10, 1) + 15)
+            blockFile <- getURL(myUrl)
+            headString <- substr(blockFile, 2, 10)
+            
+            if (headString == 'recipient') {
+                write(blockFile, paste0('./data/data', datasetNum, '.csv'))
             }
         }      
     }

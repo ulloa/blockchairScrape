@@ -17,11 +17,15 @@ for n in {0..35}; do   # start 36 fetch loops
     datasetNum=$n
     count=0
     while [ $i -lt $blockHeight ]; do
-	filesize=0
+
 	datasetNum=$((n+qtyCores*count))
+	touch "./data/data$datasetNum.csv"
+	filesize="$(wc -c <"./data/data$datasetNum.csv")"
+	
 	while [ $filesize -lt 100 ]; do
 	    curl -s -o "./data/data$datasetNum.csv" "https://api.blockchair.com/bitcoin/outputs?q=is_spent(0),block_id($i..$j)&fields=recipient,value&export=csv"
-	    filesize= stat -c '%s' "./data/data$datasetNum.csv"
+	    filesize="$(wc -c <"./data/data$datasetNum.csv")"
+
 	    # echo "curl -s -o './data/data$datasetNum.csv' 'https://api.blockchair.com/bitcoin/outputs?q=is_spent(0),block_id($i..$j)&fields=recipient,value&export=csv'" >> commands.txt
 	    # echo "wget --no-cache -O './data/data$datasetNum.csv' 'https://api.blockchair.com/bitcoin/outputs?q=is_spent\(0\),block_id\($i..$j\)&fields=recipient,value&export=csv'" >> commands.txt
 	    if [ $filesize -gt 100 ]; then
@@ -40,7 +44,7 @@ for n in {0..35}; do   # start 36 fetch loops
 		    j=$((j-25*($n+1)))
 		fi
 	    else
-		sleep 10s
+		sleep $(( (RANDOM % 10) + 10))s
 	    fi
 	done
 	count=$((count+1))
